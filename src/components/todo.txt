@@ -1,0 +1,11 @@
+text response:
+- current time in location
+- is it day or night?
+- time since/to sunrise
+- time since/to sunset
+
+leaflet]
+
+.env for api key
+
+data vis

@@ -1,25 +1,46 @@
+import { useLayoutEffect } from "react"
 
+function localise(time, zone){
+    return time.toLocaleString('en-GB', {timeZone: zone, hour: '2-digit', minute: '2-digit'})
+}
+
+function hoursAndMinutes(seconds) {
+    const hours = Math.floor(seconds / 3600)
+    const remainingSeconds = seconds - (hours * 3600)
+    const minutes = Math.floor(remainingSeconds / 60)
+    return [hours, minutes]
+}
 
 const Text = ({data, location}) => {
-    const{sunrise,sunset,day_length,dst, zoneName, gmtOffset} = data;
-    if(sunrise===undefined||dst===undefined) return <p>loading...</p>
-    updateTime(sunrise,dst)
-    const[long,lat] = location;
-    
-    function updateTime(time, offset, gmtOffset){
-        let hourTime = +(time.split(':')[0])
-        let locationHour = hourTime+(gmtOffset/3600)
-        console.log(locationHour, gmtOffset)
-        if(locationHour>12) return (locationHour-12) + time.slice(1,-2)
+    let {sunrise,sunset,day_length, zoneName} = data;
+    if(sunrise === undefined || zoneName === undefined) return <p>loading...</p>
+    sunrise = new Date(sunrise)
+    sunset = new Date(sunset)
 
-        return locationHour + time.slice(1,-2)
+    const[long,lat] = location;
+
+    const [currentHours, currentMinutes] = hoursAndMinutes(day_length)
+
+    const currentTime = new Date
+    const isDay = currentTime > sunrise && currentTime < sunset
+    let timeUntil
+    if (isDay) {
+        timeUntil = (sunset - currentTime) / 1000
+    } else {
+        timeUntil = (currentTime - sunset) / 1000   
     }
+    const [untilHours, untilMinutes] = hoursAndMinutes(timeUntil)
+
     return (
         <div>
-            <p>Longitute is {long}. Latitude is {lat}</p>
-            <p>Sunrise at location is {updateTime(sunrise,dst, gmtOffset)}AM</p>
-            <p>Sunset at location is {updateTime(sunset,dst, gmtOffset)}PM</p>
-            <p>Day length at location is {day_length}</p>
+            <p>Longitude: {long}. Latitude: {lat}</p>
+            <p>Timezone is {zoneName}</p>
+            <p>The current time is {localise(currentTime, zoneName)}</p>
+            {isDay && <p>{untilHours} hours and {untilMinutes} minutes until sunset</p>}
+            {!isDay && <p>{untilHours} hours and {untilMinutes} minutes since sunset</p>}
+            <p>Sunrise time: {localise(sunrise, zoneName)}</p>
+            <p>Sunset time: {localise(sunset, zoneName)}</p>
+            <p>Day length at location is {currentHours} hours and {currentMinutes} minutes</p>
         </div>
     );
 };
