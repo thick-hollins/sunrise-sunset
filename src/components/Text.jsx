@@ -1,4 +1,4 @@
-import { useLayoutEffect } from "react"
+
 
 function localise(time, zone){
     return time.toLocaleString('en-GB', {timeZone: zone, hour: '2-digit', minute: '2-digit'})
@@ -11,7 +11,7 @@ function hoursAndMinutes(seconds) {
     return [hours, minutes]
 }
 
-const Text = ({data, location}) => {
+const Text = ({data, location, setDay}) => {
     let {sunrise,sunset,day_length, zoneName} = data;
     if(sunrise === undefined || zoneName === undefined) return <p>loading...</p>
     sunrise = new Date(sunrise)
@@ -21,13 +21,15 @@ const Text = ({data, location}) => {
 
     const [currentHours, currentMinutes] = hoursAndMinutes(day_length)
 
-    const currentTime = new Date
+    const currentTime = new Date()
     const isDay = currentTime > sunrise && currentTime < sunset
     let timeUntil
     if (isDay) {
         timeUntil = (sunset - currentTime) / 1000
+        setDay(true)
     } else {
-        timeUntil = (currentTime - sunset) / 1000   
+        timeUntil = (currentTime - sunset) / 1000
+        setDay(false)   
     }
     const [untilHours, untilMinutes] = hoursAndMinutes(timeUntil)
 
